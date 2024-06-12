@@ -1,15 +1,14 @@
 -- ** Movie Database project. See the file movies_erd for table\column info. **
 
 -- 1. Give the name, release year, and worldwide gross of the lowest grossing movie.
--- select 
--- 	film_title as title,
+-- SELECT 
+-- 	film_title AS title,
 -- 	release_year,
--- 	worldwide_gross as worldwide_gross
--- from specs
--- left join revenue
--- 	on specs.movie_id = revenue.movie_id
--- 	group by title, release_year, revenue.worldwide_gross
--- 	order by worldwide_gross
+-- 	worldwide_gross AS worldwide_gross
+-- FROM specs
+-- LEFT JOIN revenue
+-- 	ON specs.movie_id = revenue.movie_id
+-- 		order by worldwide_gross
 -- limit 10;
 
 -- "Semi-Tough"	1977	37187139
@@ -19,7 +18,7 @@
 
 -- Select
 -- 	specs.release_year,
--- 	round(avg(rating.movie_id),2) as average_rating
+-- 	round(avg(rating.imdb_rating),2) as average_rating
 -- from specs
 -- 	left join rating
 -- on specs.movie_id = rating.movie_id
@@ -27,36 +26,101 @@
 -- 	group by specs.release_year
 -- 	order by average_rating;
 
--- 	2019 5551.50
+-- 	1983 6.50
 
 
 -- 3. What is the highest grossing G-rated movie? Which company distributed it?
 
-select 
-	distrbutor,
-	movie_title,
-	worldwide_gross
-from specs
-left inner join revenue
-	on specs.movie_id = revenue.movie_id
-and
-right inner join distributors
-	on domestic_distributor_id =distributors.distributor_id
-	revenue.gross
+-- select 
+-- 	distributors.distrbutor,
+-- 	specs.movie_title,
+-- 	revenue.worldwide_gross
+-- from specs
+-- left join revenue
+-- 	on specs.movie_id = revenue.movie_id
+-- left join distributors
+-- 	on specs.domestic_distributor_id = distributors.distributor_id
+	
+-- where mpaa_rating = 'G'
+-- order by worldwide_gross
+-- limit 3;
 
-where mpaa_rating = 'G'
-order by gross
-limit 3;
+-- ERRORRRS
 
--- 4. Write a query that returns, for each distributor in the distributors table, the distributor name and the number of movies associated with that distributor in the movies 
--- table. Your result set should include all of the distributors, whether or not they have any movies in the movies table.
+-- 4. Write a query that returns, for each distributor in the distributors table,
+-- the distributor name and the number of movies associated with that distributor 
+-- 	in the movies table. 
+-- Your result set should include all of the distributors, whether or not
+-- they have any movies in the movies table.
 
--- 5. Write a query that returns the five distributors with the highest average movie budget.
+-- SELECT 
+-- 	distributors.company_name AS distributor_name,
+-- 	count(specs.domestic_distributor_id) AS number_of_movies
+-- FROM distributors
+-- 	LEFT JOIN specs
+-- 	ON distributors.distributor_id = specs.domestic_distributor_id
+-- 	GROUP BY distributors.company_name
+-- 	ORDER BY number_of_movies desc;
 
--- 6. How many movies in the dataset are distributed by a company which is not headquartered in California? Which of these movies has the highest imdb rating?
+-- DONE
 
--- 7. Which have a higher average rating, movies which are over two hours long or movies which are under two hours?
+-- 5. Write a query that returns the five distributors with the 
+-- highest average movie budget.
 
+SELECT
+	distributors.company_name AS company_name,
+	AVG(revenue.film_budget) AS film_budget
+FROM distributors
+	LEFT JOIN specs
+	ON distributors.distributor_id = specs.movie_id
+	
+	LEFT JOIN revenue
+	ON specs.movie_id = revenue.movie_id
+	GROUP BY company_name
+ORDER BY AVG(revenue.film_budget) DESC
+LIMIT 5;
+
+-- GETTING NULLS
+
+-- 6. How many movies in the dataset are distributed by a company
+-- which is not headquartered in California? 
+-- Which of these movies has the highest imdb rating?
+
+-- SELECT specs.film_title AS film_title,
+-- 	rating.imdb_rating AS imdb_rating,
+-- 	distributors.headquarters AS hq
+-- From specs
+-- 	left join distributors
+-- 	on specs.domestic_distributor_id = distributors.distributor_id
+-- 	left join rating
+-- 	on specs.movie_id = rating.movie_id
+-- WHERE distributors.headquarters NOT LIKE '%CA%'
+-- ORDER BY imdb_rating desc
+-- ;
+-- 2 movies, dirty dancing 7 and my big fat greek wedding 6.5 were not in CA
+
+
+-- 7. Which have a higher average rating, movies which are over two
+-- hours long or movies which are under two hours?
+-- SELECT
+-- 	AVG(rating.IMDB_RATING) AS imdb_rating
+-- FROM specs
+-- 	LEFT JOIN rating
+-- 	USING (movie_id)
+-- WHERE (length_in_min/60) >= 2
+-- ORDER BY IMDB_RATING;
+-- imdb rating is this	7.2497584541062802
+
+-- SELECT
+-- 	AVG(rating.IMDB_RATING) AS imdb_rating
+-- FROM specs
+-- 	left join rating
+-- 	USING (movie_id)
+-- WHERE (length_in_min/60) < 2
+-- ORDER BY IMDB_RATING;
+-- imdb rating is this 6.9161434977578475
+
+-- 2 hour run time wins
 
 -- ## Joins Exercise Bonus Questions
 
